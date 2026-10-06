@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Condimentos y Especies Sandra - Sistema de Gestión</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      margin: 0;
+      background-color: #f4f6f8;
+      color: #333;
+    }
+    header {
+      background-color: #2d5a27;
+      color: white;
+      padding: 15px 20px;
+      text-align: center;
+    }
+    nav {
+      display: flex;
+      justify-content: center;
+      background-color: #1e3d1a;
+      padding: 10px;
+      gap: 10px;
+    }
+    nav button {
+      background: #3e7b37;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    nav button.active {
+      background: #8bc34a;
+      color: #1e3d1a;
+    }
+    .container {
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input[type="text"], input[type="tel"], input[type="url"], select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .btn-submit {
+      background-color: #2d5a27;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      width: 100%;
+      font-size: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .btn-gps {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+    .btn-gps:hover {
+      background-color: #0056b3;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    .gps-container {
+      display: flex;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Condimentos y Especies Sandra</h1>
+    <p>Sistema de Gestión de Ventas y Pedidos a Bodega</p>
+  </header>
+
+  <nav>
+    <button class="nav-btn active" onclick="cambiarTab('dashboard')">📊 Dashboard Ventas</button>
+    <button class="nav-btn" onclick="cambiarTab('clientes')">👤 Clientes</button>
+    <button class="nav-btn" onclick="cambiarTab('productos')">📦 Cargar Productos</button>
+  </nav>
+
+  <div class="container">
+    
+    <!-- Pestaña Dashboard -->
+    <div id="dashboard" class="tab-content active">
+      <h2>Dashboard de Ventas</h2>
+      <p>Bienvenido al sistema de gestión de Condimentos Sandra.</p>
+    </div>
+
+    <!-- Pestaña Clientes -->
+    <div id="clientes" class="tab-content">
+      <h2>Registrar Nuevo Cliente</h2>
+      <form id="form-cliente">
+        <div class="form-group">
+          <label for="cliente-nombre">Nombre del Cliente / Negocio:</label>
+          <input type="text" id="cliente-nombre" placeholder="Abastecedor Jefrith" required>
+        </div>
+
+        <div class="form-group">
+          <label for="cliente-telefono">Teléfono:</label>
+          <input type="tel" id="cliente-telefono" placeholder="83102375">
+        </div>
+
+        <div class="form-group">
+          <label for="cliente-direccion">Dirección Física:</label>
+          <input type="text" id="cliente-direccion" placeholder="San Rafael Abajo">
+        </div>
+
+        <div class="form-group">
+          <label for="cliente-gps">Punto GPS (Enlace de Google Maps / Waze):</label>
+          <div class="gps-container">
+            <input type="url" id="cliente-gps" placeholder="https://maps.google.com/?q=..." style="flex-grow: 1;">
+            <button type="button" class="btn-gps" onclick="obtenerUbicacion()" title="Usar mi ubicación actual">📍 Mi Ubicación</button>
+          </div>
+        </div>
+
+        <button type="button" class="btn-submit" onclick="guardarCliente()">Guardar Cliente</button>
+      </form>
+
+      <hr style="margin: 30px 0;">
+
+      <h2>Clientes Registrados</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Teléfono</th>
+            <th>Dirección</th>
+            <th>GPS</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-clientes-body">
+          <!-- Los clientes cargados aparecerán aquí -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pestaña Productos -->
+    <div id="productos" class="tab-content">
+      <h2>Cargar Productos</h2>
+      <p>Gestión del catálogo e inventario de productos.</p>
+    </div>
+
+  </div>
+
+  <script>
+    // Cambio entre pestañas
+    function cambiarTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+      
+      document.getElementById(tabId).classList.add('active');
+      event.currentTarget.classList.add('active');
+    }
+
+    // Función para obtener coordenadas GPS actuales
+    function obtenerUbicacion() {
+      const inputGps = document.getElementById('cliente-gps');
+      
+      if (!navigator.geolocation) {
+        alert("Tu navegador no soporta geolocalización.");
+        return;
+      }
+
+      inputGps.value = "Obteniendo ubicación...";
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          const urlMaps = `https://www.google.com/maps?q=${lat},${lng}`;
+          inputGps.value = urlMaps;
+        },
+        (error) => {
+          inputGps.value = "";
+          switch(error.code) {
+            case error.PERMISSION_DENIED:
+              alert("Permiso denegado. Activa el permiso de ubicación en tu navegador o teléfono.");
+              break;
+            case error.POSITION_UNAVAILABLE:
+              alert("Información de ubicación no disponible.");
+              break;
+            case error.TIMEOUT:
+              alert("La consulta de ubicación caducó.");
+              break;
+            default:
+              alert("Error al obtener la ubicación.");
+              break;
+          }
+        }
+      );
+    }
+
+    // Guardar cliente temporal en la tabla de ejemplo
+    function guardarCliente() {
+      const nombre = document.getElementById('cliente-nombre').value;
+      const telefono = document.getElementById('cliente-telefono').value;
+      const direccion = document.getElementById('cliente-direccion').value;
+      const gps = document.getElementById('cliente-gps').value;
+
+      if (!nombre) {
+        alert("Por favor ingresa el nombre del cliente.");
+        return;
+      }
+
+      const tbody = document.getElementById('tabla-clientes-body');
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${nombre}</td>
+        <td>${telefono}</td>
+        <td>${direccion}</td>
+        <td>${gps ? `<a href="${gps}" target="_blank">Ver Mapa</a>` : 'N/A'}</td>
+      `;
+      tbody.appendChild(tr);
+
+      document.getElementById('form-cliente').reset();
+      alert("Cliente guardado correctamente.");
+    }
+  </script>
+
+</body>
+</html>
